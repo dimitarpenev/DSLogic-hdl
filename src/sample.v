@@ -138,12 +138,21 @@ begin
 end
 always @(negedge sample_clk or posedge sample_rst)
 begin
-	neg_data_1T <= `D neg_data;
-	neg_data_2T <= `D neg_data_1T;
+   if (sample_rst) 
+		begin
+			neg_data_1T <=`D 16'b0;
+			neg_data_2T <=`D 16'b0;
+			neg_data_final <=`D 16'b0;
+		end
+	else
+		begin
+			neg_data_1T <= `D neg_data;
+			neg_data_2T <= `D neg_data_1T;
 //	neg_data_final <= `D (((neg_data ^ neg_data_1T) | (neg_data_1T ^ neg_data_2T)) & neg_data_final) | 
 //	                     (~((neg_data ^ neg_data_1T) | (neg_data_1T ^ neg_data_2T))& neg_data_1T);
-	neg_data_final <= `D ((neg_data ^ neg_data_1T) & neg_data_final) | 
+			neg_data_final <= `D ((neg_data ^ neg_data_1T) & neg_data_final) | 
 	                     (~(neg_data ^ neg_data_1T) & neg_data_1T);
+		end						
 end
 
 
