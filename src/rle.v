@@ -61,13 +61,13 @@ begin
 		if (cnt == 14'b0)       // -- write first sample of the series
 		begin
 			rle_data <= {1'b0, capture_data[14:0]};
-			rle_valid <=0;
+			rle_valid <=1;
 		end
 		else if (cnt == 14'b1)  // -- counter overflow
 		begin
 			cnt <= 14'b0;   // -- reset counter
 			rle_data <= 15'b1;                     
-			rle_valid <=0;
+			rle_valid <=1;
 		end
 		else
 			rle_valid <=0;
@@ -80,6 +80,6 @@ begin
 		else
 			rle_data <= {1'b0, old};
 		cnt <= 14'b0;
-		rle_valid <=0;
+		rle_valid <=1;
 	end
 end
