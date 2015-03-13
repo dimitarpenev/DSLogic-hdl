@@ -1,10 +1,14 @@
 /*
  * This file is part of the DSLogic-hdl project.
  * It implements Run Length Encoding to optimize the memory usage 
- * of the DSLogic instrument 
- *
+ * of the DSLogic instrument.   
  * Dimitar Penev 
  * Copyright (C) 2014 Switchfin Org. <dpn@switchfin.org>
+ *
+ *  If RLE is used last bit in data streem notifies sample/count
+ *  samples are capturing allbut 16th data bit  
+ *  Streem with equal samples is represented by the pair   
+ *	 {0 sample} {1 how_much_extra_equal_samples} ...   
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,46 +44,71 @@ module rle(
 // --
 reg     [14:0] old;     //Old sample
 reg     [14:0] cnt;     //counter of the equal samples in series
+reg	  [15:0] rle_data_reg;
+reg	  			rle_valid_reg;
+reg	  [24:0] rle_samples_cnt; 	
 
+assign rle_data=rle_data_reg;
+assign rle_valid=rle_valid_reg;
+	
 always @(posedge core_clk or posedge core_rst)
 begin
 	if (core_rst)
-		old <= 14'b0;
+		old <= 15'b0;
 	else
 		old <= capture_data[14:0];
 end
 
+/*always @(posedge core_clk or posedge core_rst)
+begin
+	if (core_rst)
+	begin
+		cnt <= 15'b0;
+		rle_valid_reg <= 0;
+		rle_data_reg <= 0; 
+	end
+	else
+	begin
+		rle_data_reg <= rle_data_reg + 1;
+		rle_valid_reg <= ~rle_valid_reg;
+	end
+end
+*/
+
 always @(posedge core_clk or posedge core_rst)
 begin
 	if (core_rst)
 	begin
-		cnt <= 14'b0;
-		rle_valid <=0;
+		cnt <= 15'b0;
+		rle_valid_reg <= 0;
+		rle_data_reg <= 0;		
 	end
 	else if (old == capture_data[14:0])
 	begin 
-		if (cnt == 14'b0)       // -- write first sample of the series
+		if (cnt == 15'b0)       // -- write first sample of the series
 		begin
-			rle_data <= {1'b0, capture_data[14:0]};
-			rle_valid <=1;
+			rle_data_reg <= {1'b0, capture_data[14:0]};
+			rle_valid_reg <=1; 
 		end
-		else if (cnt == 14'b1)  // -- counter overflow
+		else if (cnt[14:0] == 15'b111111111111111)  // -- counter overflow
 		begin
-			cnt <= 14'b0;   // -- reset counter
-			rle_data <= 15'b1;                     
-			rle_valid <=1;
+			cnt <= 15'b0;   // -- reset counter
+			rle_data_reg <= 16'b1111111111111111;
+			rle_valid_reg <=1;
 		end
 		else
-			rle_valid <=0;
-		cnt <= cnt + 1;
+			rle_valid_reg <=0;
+		cnt <= cnt + 1'b1;
 	end
 	else                            // -- end of series 
 	begin
-		if (cnt != 14'b0)
-			rle_data <= {1'b1, cnt};
+		if (cnt != 15'b0)
+			rle_data_reg <= {1'b1, cnt};
 		else
-			rle_data <= {1'b0, old};
-		cnt <= 14'b0;
-		rle_valid <=1;
+			rle_data_reg <= {1'b0, old};
+		cnt <= 15'b0;
+		rle_valid_reg <=1;
 	end
 end
+
+endmodule

@@ -76,6 +76,10 @@ wire				wfifo_real_empty_nxt;
 reg				wfifo_real_empty_sync0;
 reg				wfifo_real_empty_sync1;
 
+//For RLE
+wire	[15:0]	rle_data;
+wire 				rle_valid;
+
 assign wfifo_real_empty_nxt = (wfifo_empty_dly_cnt == 4'b0);
 assign wfifo_empty_dly_cnt_nxt = capture_valid ? 4'b1111 :
 											(wfifo_empty_dly_cnt != 4'b0) ? wfifo_empty_dly_cnt - 1'b1 : wfifo_empty_dly_cnt;
@@ -91,6 +95,42 @@ begin
 end											
 
 // --
+// RLE runs at core_clk
+// --
+
+/*
+// For test
+always @(posedge core_clk or posedge core_rst)
+begin
+	if (core_rst)
+	begin
+		capture_data_<=0;
+		capture_data_cnt_<=0;
+	end
+	else
+	begin
+		capture_data_cnt_ <=capture_data_cnt_+1;
+		if (capture_data_cnt_ == 10)
+		begin
+			capture_data_cnt_ <= 0;
+			capture_data_<=capture_data_ + 1;
+		end
+	end
+end
+*/
+
+rle rle(
+	// -- clock & reset
+	.core_clk(core_clk),
+	.core_rst(core_rst),
+	// -- data
+	.capture_data(capture_data), //Input data
+	.rle_data(rle_data),			  //Output data
+	.rle_valid(rle_valid)
+);
+
+
+// --
 // async fifo / core_clk -> sdram_clk
 // --
 wfifo wfifo(
@@ -98,8 +138,8 @@ wfifo wfifo(
 	.wr_rst(core_rst),	// input wr_rst
 	.rd_clk(sdram_clk),	// input rd_clk
 	.rd_rst(sdram_rst),	// input rd_rst
-	.din(capture_data),	// input [15 : 0] din
-	.wr_en(capture_valid & ~cons_mode),	// input wr_en
+	.din(rle_data),	// input [15 : 0] din
+	.wr_en(capture_valid & ~cons_mode & rle_valid),	// input wr_en
 	.rd_en(wr_valid),	// input rd_en
 	.dout(wr_data),		// output [15 : 0] dout
 	.full(wfifo_full),		// output full
