@@ -190,6 +190,10 @@ wire	[15:0]	dso_triggerValue;
 wire				dso_setZero;
 wire				dso_setZero_done;
 
+//RLE
+wire  [24:0] 	rle_sample_cnt; 
+
+
 // --
 // ports
 //--
@@ -565,7 +569,10 @@ capture capture(
 	.capture_done(capture_done),
 	.sd_saddr(sd_saddr),
 	.capture_valid(capture_valid),
-	.capture_data(capture_data)
+	.capture_data(capture_data),
+	
+	//from RLE
+	.rle_sample_cnt(rle_sample_cnt)
 );
 
 // --
@@ -642,7 +649,10 @@ dwrite dwrite(
    .wr_req(wr_req),
    .wr_valid(wr_valid),
    .wr_addr(wr_addr),
-	.wr_data(wr_data)
+	.wr_data(wr_data),
+	
+	//RLE
+	.rle_sample_cnt(rle_sample_cnt)
 );
 
 // --

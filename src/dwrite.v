@@ -46,7 +46,10 @@ module dwrite(
     	input           	wr_valid,
     	output	           	wr_req,
     	output	reg	[31:0]  wr_addr,
-    	output  	[15:0]  wr_data
+    	output  	[15:0]  wr_data,
+		
+	//Output from RLE
+	output  [24:0]  rle_sample_cnt	
 );
 
 // --
@@ -79,6 +82,8 @@ reg				wfifo_real_empty_sync1;
 //For RLE
 wire	[15:0]	rle_data;
 wire 				rle_valid;
+wire  [24:0] 	rle_sample_cnt; 
+
 
 assign wfifo_real_empty_nxt = (wfifo_empty_dly_cnt == 4'b0);
 assign wfifo_empty_dly_cnt_nxt = capture_valid ? 4'b1111 :
@@ -126,7 +131,8 @@ rle rle(
 	// -- data
 	.capture_data(capture_data), //Input data
 	.rle_data(rle_data),			  //Output data
-	.rle_valid(rle_valid)
+	.rle_valid(rle_valid),
+	.rle_sample_cnt(rle_sample_cnt)
 );
 
 

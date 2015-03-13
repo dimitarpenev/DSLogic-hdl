@@ -36,7 +36,8 @@ module rle(
 	// -- data
 	input   [15:0]  capture_data,
 	output  [15:0]  rle_data,
-	output          rle_valid
+	output          rle_valid,
+	output  [24:0]  rle_sample_cnt 	
 );
 
 // --
@@ -46,10 +47,11 @@ reg     [14:0] old;     //Old sample
 reg     [14:0] cnt;     //counter of the equal samples in series
 reg	  [15:0] rle_data_reg;
 reg	  			rle_valid_reg;
-reg	  [24:0] rle_samples_cnt; 	
+reg	  [24:0] rle_sample_cnt_reg; 	
 
 assign rle_data=rle_data_reg;
 assign rle_valid=rle_valid_reg;
+assign rle_sample_cnt=rle_sample_cnt_reg;
 	
 always @(posedge core_clk or posedge core_rst)
 begin
@@ -88,16 +90,16 @@ begin
 		if (cnt == 15'b0)       // -- write first sample of the series
 		begin
 			rle_data_reg <= {1'b0, capture_data[14:0]};
-			rle_valid_reg <=1; 
+			rle_valid_reg <= 1; 
 		end
 		else if (cnt[14:0] == 15'b111111111111111)  // -- counter overflow
 		begin
 			cnt <= 15'b0;   // -- reset counter
 			rle_data_reg <= 16'b1111111111111111;
-			rle_valid_reg <=1;
+			rle_valid_reg <= 1;
 		end
 		else
-			rle_valid_reg <=0;
+			rle_valid_reg <= 0;
 		cnt <= cnt + 1'b1;
 	end
 	else                            // -- end of series 
@@ -107,8 +109,20 @@ begin
 		else
 			rle_data_reg <= {1'b0, old};
 		cnt <= 15'b0;
-		rle_valid_reg <=1;
+		rle_valid_reg <= 1;
 	end
 end
 
+//RLE sample count
+always @(posedge core_clk or posedge core_rst)
+begin
+	if (core_rst)
+			rle_sample_cnt_reg <= 0;
+	else if (rle_valid_reg)
+	begin
+			rle_sample_cnt_reg <= rle_sample_cnt_reg +1;
+			if (rle_sample_cnt_reg == 25'H1000000) //16 MSamples memory
+				rle_sample_cnt_reg <= 0;
+	end
+end
 endmodule
