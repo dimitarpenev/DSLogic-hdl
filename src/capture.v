@@ -57,6 +57,7 @@ module capture(
 	output		[15:0]	capture_data,
 	
 	//from RLE
+	input				rle_en,
 	input  [24:0]  rle_sample_cnt
 );
 // --
@@ -206,8 +207,8 @@ end
 
 assign capture_done_nxt = capture_done ? 1'b0 :
 			 (~cons_mode & trig_hit & trig_en & capture_cnt_valid & (capture_cnt == after_trig_depth)) ? 1'b1 :
-			 //(~cons_mode & trig_hit & ~trig_en & capture_valid_pre & (capture_cnt == sample_last_cnt)) ? 1'b1 : capture_done;
-			 (~cons_mode & trig_hit & ~trig_en & capture_valid_pre & (rle_sample_cnt[24:0] == 25'Hffff)) ? 1'b1 : capture_done; //This is for instant trigger mode
+			 ((~rle_en)?((~cons_mode & trig_hit & ~trig_en & capture_valid_pre & (capture_cnt == sample_last_cnt)) ? 1'b1 : capture_done):
+			  ((~cons_mode & trig_hit & ~trig_en & capture_valid_pre & (rle_sample_cnt[24:0] == 25'Hffff)) ? 1'b1 : capture_done)); //This is for instant trigger mode
 always @(posedge core_clk or posedge core_rst)
 begin
 	if (core_rst)

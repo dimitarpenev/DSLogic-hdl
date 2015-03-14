@@ -48,7 +48,8 @@ module dwrite(
     	output	reg	[31:0]  wr_addr,
     	output  	[15:0]  wr_data,
 		
-	//Output from RLE
+	// -- RLE
+	input				 rle_en,
 	output  [24:0]  rle_sample_cnt	
 );
 
@@ -144,7 +145,7 @@ wfifo wfifo(
 	.wr_rst(core_rst),	// input wr_rst
 	.rd_clk(sdram_clk),	// input rd_clk
 	.rd_rst(sdram_rst),	// input rd_rst
-	.din(rle_data),	// input [15 : 0] din
+	.din(rle_en?rle_data:capture_data),	// input [15 : 0] din
 	.wr_en(capture_valid & ~cons_mode & rle_valid),	// input wr_en
 	.rd_en(wr_valid),	// input rd_en
 	.dout(wr_data),		// output [15 : 0] dout

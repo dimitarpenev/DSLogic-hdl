@@ -71,7 +71,9 @@ module cfg(
 
 	output		read_start,
 	output	[31:0]	sd_saddr,
-	output		sd_fbe
+	output		sd_fbe,
+	
+	output 		rle_en
 );
 
 // --
@@ -304,6 +306,7 @@ assign cons_mode = cfg0_reg[4];
 assign half_mode = cfg0_reg[5];
 assign quarter_mode = cfg0_reg[6];
 assign wireless_mode = cfg0_reg[7];
+assign rle_en = cfg0_reg[12];
 assign sd_lpb_mode = cfg0_reg[13];
 assign ext_test_mode = cfg0_reg[14];
 assign test_mode = cfg0_reg[15];

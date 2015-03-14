@@ -191,6 +191,7 @@ wire				dso_setZero;
 wire				dso_setZero_done;
 
 //RLE
+wire				rle_en;
 wire  [24:0] 	rle_sample_cnt; 
 
 
@@ -431,7 +432,9 @@ cfg cfg(
 
 	.read_start(),
 	.sd_saddr(),
-	.sd_fbe(sd_fbe)
+	.sd_fbe(sd_fbe),
+	
+	.rle_en(rle_en)
 );
 
 // --
