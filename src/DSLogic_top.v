@@ -655,6 +655,7 @@ dwrite dwrite(
 	.wr_data(wr_data),
 	
 	//RLE
+	.rle_en(rle_en),
 	.rle_sample_cnt(rle_sample_cnt)
 );
 

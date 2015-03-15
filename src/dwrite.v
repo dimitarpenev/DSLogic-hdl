@@ -146,7 +146,7 @@ wfifo wfifo(
 	.rd_clk(sdram_clk),	// input rd_clk
 	.rd_rst(sdram_rst),	// input rd_rst
 	.din(rle_en?rle_data:capture_data),	// input [15 : 0] din
-	.wr_en(capture_valid & ~cons_mode & (rle_valid|~rle_en)),	// input wr_en
+	.wr_en(capture_valid & ~cons_mode & (rle_valid | ~rle_en)),	// input wr_en
 	.rd_en(wr_valid),	// input rd_en
 	.dout(wr_data),		// output [15 : 0] dout
 	.full(wfifo_full),		// output full
