@@ -32,6 +32,9 @@ module rle(
 	// -- clock & reset
 	input   core_clk,
 	input   core_rst,
+	
+	//trigger hit starts RLE
+	input		trig_hit,
 
 	// -- data
 	input   [15:0]  capture_data,
@@ -49,37 +52,25 @@ reg	  [15:0] rle_data_reg;
 reg	  			rle_valid_reg;
 reg	  [24:0] rle_sample_cnt_reg; 	
 
+reg				rle_start;
+
 assign rle_data=rle_data_reg;
 assign rle_valid=rle_valid_reg;
 assign rle_sample_cnt=rle_sample_cnt_reg;
 	
+//old keeps track of the previous data sample
 always @(posedge core_clk or posedge core_rst)
 begin
-	if (core_rst)
+	if (core_rst | ~rle_start)
 		old <= 15'b0;
 	else
 		old <= capture_data[14:0];
 end
 
-/*always @(posedge core_clk or posedge core_rst)
-begin
-	if (core_rst)
-	begin
-		cnt <= 15'b0;
-		rle_valid_reg <= 0;
-		rle_data_reg <= 0; 
-	end
-	else
-	begin
-		rle_data_reg <= rle_data_reg + 1;
-		rle_valid_reg <= ~rle_valid_reg;
-	end
-end
-*/
-
+//Actual RLE encoding
 always @(posedge core_clk or posedge core_rst)
 begin
-	if (core_rst)
+	if (core_rst | ~rle_start)
 	begin
 		cnt <= 15'b0;
 		rle_valid_reg <= 0;
@@ -113,16 +104,27 @@ begin
 	end
 end
 
-//RLE sample count
+//Set rle_start when get a trig_hit 
+//
+//rle_sample_cnt counts the amount of RLE samples we have process
+//This is used in capture module to stop the acquisition
 always @(posedge core_clk or posedge core_rst)
 begin
 	if (core_rst)
+	begin
 			rle_sample_cnt_reg <= 0;
-	else if (rle_valid_reg)
+			rle_start <= 0;
+	end
+	else if (~rle_start & trig_hit)
+			rle_start <= 1'b1;	
+	else if (rle_start & rle_valid_reg )
 	begin
 			rle_sample_cnt_reg <= rle_sample_cnt_reg +1;
-			if (rle_sample_cnt_reg == 25'H1000000) //16 MSamples memory
+			if (rle_sample_cnt_reg == 25'Hffff)//25'H1000000) //16 MSamples memory
+			begin
 				rle_sample_cnt_reg <= 0;
+				rle_start <=1'b0;
+			end	
 	end
 end
 endmodule

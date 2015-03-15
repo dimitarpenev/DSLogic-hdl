@@ -50,6 +50,7 @@ module dwrite(
 		
 	// -- RLE
 	input				 rle_en,
+	input				 trig_hit,
 	output  [24:0]  rle_sample_cnt	
 );
 
