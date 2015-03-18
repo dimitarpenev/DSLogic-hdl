@@ -234,7 +234,7 @@ in_dcm in_dcm (
     .CLK_IN1(sys_clk),      // IN
     // Clock out ports
     .CLK_OUT1(),            // OUT
-	 .CLK_OUT2(clk_120M),
+    .CLK_OUT2(clk_120M),
     // Status and control signals
     .RESET(~sys_rst),       // IN
     .LOCKED(in_dcm_locked)  // OUT
@@ -649,9 +649,9 @@ dwrite dwrite(
 
 	// -- sdramc
 	.wr_done(wr_done),
-   .wr_req(wr_req),
-   .wr_valid(wr_valid),
-   .wr_addr(wr_addr),
+   	.wr_req(wr_req),
+   	.wr_valid(wr_valid),
+   	.wr_addr(wr_addr),
 	.wr_data(wr_data),
 	
 	//RLE

@@ -49,17 +49,17 @@ module dwrite(
     	output  	[15:0]  wr_data,
 		
 	// -- RLE
-	input				 rle_en,
-	input				 trig_hit,
+	input		rle_en,
+	input		trig_hit,
 	output  [24:0]  rle_sample_cnt	
 );
 
 // --
 // internal signals definition
 // --
-wire			wfifo_empty;
+wire		wfifo_empty;
 wire	[9:0]	wfifo_rcnt;
-wire			wfifo_prog_empty;
+wire		wfifo_prog_empty;
 
 wire		wr_req_nxt;
 wire	[31:0]	wr_addr_nxt;
@@ -70,21 +70,21 @@ reg		capture_done_sdram_clk;
 
 reg	[31:0]	wr_cnt;
 wire	[31:0]	wr_cnt_nxt;
-reg				sample_en_sync0;
-reg				sample_en_sync1;
-reg				sample_en_sync2;
+reg		sample_en_sync0;
+reg		sample_en_sync1;
+reg		sample_en_sync2;
 
-reg	[3:0]		wfifo_empty_dly_cnt;
-wire	[3:0]		wfifo_empty_dly_cnt_nxt;
-reg				wfifo_real_empty;
-wire				wfifo_real_empty_nxt;
-reg				wfifo_real_empty_sync0;
-reg				wfifo_real_empty_sync1;
+reg	[3:0]	wfifo_empty_dly_cnt;
+wire	[3:0]	wfifo_empty_dly_cnt_nxt;
+reg		wfifo_real_empty;
+wire		wfifo_real_empty_nxt;
+reg		wfifo_real_empty_sync0;
+reg		wfifo_real_empty_sync1;
 
 //For RLE
 wire	[15:0]	rle_data;
-wire 				rle_valid;
-wire  [24:0] 	rle_sample_cnt; 
+wire 		rle_valid;
+wire	[24:0]	rle_sample_cnt; 
 
 
 assign wfifo_real_empty_nxt = (wfifo_empty_dly_cnt == 4'b0);
@@ -134,7 +134,9 @@ rle rle(
 	.capture_data(capture_data), //Input data
 	.rle_data(rle_data),			  //Output data
 	.rle_valid(rle_valid),
-	.rle_sample_cnt(rle_sample_cnt)
+	.rle_sample_cnt(rle_sample_cnt),
+	.trig_hit(trig_hit)
+
 );
 
 
@@ -150,7 +152,7 @@ wfifo wfifo(
 	.wr_en(capture_valid & ~cons_mode & (rle_valid | ~rle_en)),	// input wr_en
 	.rd_en(wr_valid),	// input rd_en
 	.dout(wr_data),		// output [15 : 0] dout
-	.full(wfifo_full),		// output full
+	.full(wfifo_full),	// output full
 	.empty(wfifo_empty),	// output empty
 	.prog_empty(wfifo_prog_empty)
 );
@@ -242,7 +244,7 @@ end
 assign wr_req = ~wfifo_empty;
 
 // -- wr_addr
-assign wr_addr_nxt = (wr_valid & ({2'b0, wr_addr[31:2]} == sample_last_cnt)) ? 32'b0 :
+assign wr_addr_nxt = (/*(rle_en & trig_hit)|*/(wr_valid & ({2'b0, wr_addr[31:2]} == sample_last_cnt))) ? 32'b0 :
 		     wr_valid ? wr_addr + 3'b100 : wr_addr;
 always @(posedge sdram_clk or posedge sdram_rst)
 begin

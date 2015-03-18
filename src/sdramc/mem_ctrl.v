@@ -48,8 +48,8 @@ module mem_ctrl (
 	output          sdram_ras_,
 	output          sdram_cas_,
 	output          sdram_we_,
-	output  	 		 sdram_dqml,
-	output			 sdram_dqmh,
+	output		sdram_dqml,
+	output		sdram_dqmh,
 	output          sdram_cke,
 	output          sdram_cs_
 );

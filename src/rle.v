@@ -46,13 +46,13 @@ module rle(
 // --
 // internal registers definition
 // --
-reg     [14:0] old;     //Old sample
-reg     [14:0] cnt;     //counter of the equal samples in series
-reg	  [15:0] rle_data_reg;
-reg	  			rle_valid_reg;
-reg	  [24:0] rle_sample_cnt_reg; 	
+reg     [14:0] 	old;     //Old sample
+reg     [14:0] 	cnt;     //counter of the equal samples in series
+reg	[15:0] 	rle_data_reg;
+reg		rle_valid_reg;
+reg	[24:0] 	rle_sample_cnt_reg; 	
 
-reg				rle_start;
+reg		rle_start;
 
 assign rle_data=rle_data_reg;
 assign rle_valid=rle_valid_reg;
@@ -112,19 +112,19 @@ always @(posedge core_clk or posedge core_rst)
 begin
 	if (core_rst)
 	begin
-			rle_sample_cnt_reg <= 0;
-			rle_start <= 0;
+		rle_sample_cnt_reg <= 0;
+		rle_start <= 0;
 	end
 	else if (~rle_start & trig_hit)
 			rle_start <= 1'b1;	
 	else if (rle_start & rle_valid_reg )
 	begin
-			rle_sample_cnt_reg <= rle_sample_cnt_reg +1;
-			if (rle_sample_cnt_reg == 25'Hffff)//25'H1000000) //16 MSamples memory
-			begin
-				rle_sample_cnt_reg <= 0;
-				rle_start <=1'b0;
-			end	
+		rle_sample_cnt_reg <= rle_sample_cnt_reg +1;
+		if (rle_sample_cnt_reg == 25'Hffff)//25'H1000000) //16 MSamples memory
+		begin
+			rle_sample_cnt_reg <= 0;
+			rle_start <=1'b0;
+		end	
 	end
 end
 endmodule
