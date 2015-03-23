@@ -23,17 +23,17 @@
 
 module cfg(
 	// --clock & reset
-	input		usb_clk,
-	input		usb_rst,
-	input    core_clk,
-	input    core_rst,
+	input	usb_clk,
+	input	usb_rst,
+	input	core_clk,
+	input	core_rst,
 	
 	// -- usb config
 	input		usb_en,
 	input		usb_wr,
 	input	[15:0]	usb_data,
 
-	input			capture_done,
+	input		capture_done,
 
 	// -- config output
 	output		ext_clk_mode,
@@ -48,19 +48,19 @@ module cfg(
 	output	[23:0]	sample_divider,
 	
 	output	reg		full_speed,
-	output				trig_en,
+	output			trig_en,
 	output	[3:0]		trig_stages,
-	output				trig_value_wr,
-	output				trig_mask_wr,
-	output				trig_edge_wr,
-	output				trig_count_wr,
-	output				trig_logic_wr,
+	output			trig_value_wr,
+	output			trig_mask_wr,
+	output			trig_edge_wr,
+	output			trig_count_wr,
+	output			trig_logic_wr,
 	output	[1:0]		trig_mu,
 	output	[15:0]	trig_mask,
 	output	[15:0]	trig_value,
 	output	[15:0]	trig_edge,
 	output	[15:0]	trig_count,
-	output	[1:0]		trig_logic,
+	output	[1:0]	trig_logic,
 
 	output	[31:0]	sample_depth,
 	output	reg	[31:0]	sample_last_cnt,
@@ -81,6 +81,7 @@ module cfg(
 // --
 parameter    SYNC_CODE = 8'hFF;
 parameter    UNSYNC_CODE = 8'h00;
+parameter    MODE = "SYN";
 
 // --
 // configure protocol decode
@@ -104,17 +105,18 @@ wire	[7:0]	usb_cfg_cnt_nxt;
 reg	[5:0]	usb_addr;
 wire	[5:0]	usb_addr_nxt;
 
-wire				cfg_trig_value_wr;
-wire				cfg_trig_mask_wr;
-wire				cfg_trig_edge_wr;
-wire				cfg_trig_count_wr;
-wire				cfg_trig_logic_wr;
-wire	[1:0]		cfg_trig_mu;
+wire		cfg_trig_value_wr;
+wire		cfg_trig_mask_wr;
+wire		cfg_trig_edge_wr;
+wire		cfg_trig_count_wr;
+wire		cfg_trig_logic_wr;
+wire	[1:0]	cfg_trig_mu;
 wire	[15:0]	cfg_trig_mask;
 wire	[15:0]	cfg_trig_value;
 wire	[15:0]	cfg_trig_edge;
 wire	[15:0]	cfg_trig_count;
 wire	[15:0]	cfg_trig_logic;
+
 
 // -- usb_cfg
 always @(posedge usb_clk or posedge usb_rst)
@@ -418,20 +420,38 @@ begin
 	end
 	else
 	begin
-		cfg0_reg <= `D cfg0_reg_nxt;
-		cfg1_reg <= `D cfg1_reg_nxt;
-		cfg2_reg <= `D cfg2_reg_nxt;
-		cfg3_reg <= `D cfg3_reg_nxt;
-		cfg4_reg <= `D cfg4_reg_nxt;
-		cfg5_reg <= `D cfg5_reg_nxt;
-		cfg6_reg <= `D cfg6_reg_nxt;
-		cfg7_reg <= `D cfg7_reg_nxt;
-		cfg8_reg <= `D cfg8_reg_nxt;
-		cfg9_reg <= `D cfg9_reg_nxt;
-		cfg10_reg <= `D cfg10_reg_nxt;
-		cfg11_reg <= `D cfg11_reg_nxt;
-		cfg12_reg <= `D cfg12_reg_nxt;
-		cfg13_reg <= `D cfg13_reg_nxt;
+		if (MODE == "SYN") begin
+			cfg0_reg <= `D cfg0_reg_nxt;
+			cfg1_reg <= `D cfg1_reg_nxt;
+			cfg2_reg <= `D cfg2_reg_nxt;
+			cfg3_reg <= `D cfg3_reg_nxt;
+			cfg4_reg <= `D cfg4_reg_nxt;
+			cfg5_reg <= `D cfg5_reg_nxt;
+			cfg6_reg <= `D cfg6_reg_nxt;
+			cfg7_reg <= `D cfg7_reg_nxt;
+			cfg8_reg <= `D cfg8_reg_nxt;
+			cfg9_reg <= `D cfg9_reg_nxt;
+			cfg10_reg <= `D cfg10_reg_nxt;
+			cfg11_reg <= `D cfg11_reg_nxt;
+			cfg12_reg <= `D cfg12_reg_nxt;
+			cfg13_reg <= `D cfg13_reg_nxt;
+		end else begin
+	                cfg0_reg <= 16'h1001; //Mode, the LSB is trig_en. If trig_en=0 we will get trig_hit imediately  
+                        		      //also rle_en is set to 1 	
+			cfg1_reg <= 16'h0001; //Divider 100MHz/samplerate
+                        cfg2_reg <= 16'h0000; // ... 
+                        cfg3_reg <= 16'h0400; //Sample count we set to 1K to make simulation short 
+                        cfg4_reg <= 16'h0000; // ...
+                        cfg5_reg <= 16'h0000; //Triger position
+                        cfg6_reg <= 16'h0000; // ...
+                        cfg7_reg <= 16'h0000; //trig_glb
+                        cfg8_reg <= 16'h0000; //not used
+                        cfg9_reg <= 16'h0000; //not used
+                        cfg10_reg <= 16'hffff; //trig depth trg_adp
+                        cfg11_reg <= 16'h00ff; // ...
+                        cfg12_reg <= 16'h0000; //CPU use to read from memory. Seem not relevant for my simulation
+                        cfg13_reg <= 16'h0000; // ...
+		end
 	end
 end
 

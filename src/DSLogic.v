@@ -21,10 +21,10 @@
 `timescale 1ns/100ps
 `define D #1
 
-module DSLogic_top(
+module DSLogic(
 	// -- clock & reset
  	input	sys_clk,
-	input cclk,
+	input	cclk,
 	inout	ext_clk,
 	output	sd_clk_out,
 	input	sd_clk_fb,
@@ -62,10 +62,11 @@ module DSLogic_top(
 	output		sd_dqmh,
 	//output		sd_cke,
 	output		sd_cs_
+
 );
 
 // --
-
+parameter MODE = "SYN";
 
 // --
 wire		usb_clk;
@@ -100,20 +101,20 @@ wire	[15:0]	usb_din;
 wire	[15:0]	usb_dout;
 wire	[15:0]	usb_rdata;
 
-wire				full_speed;
-wire				trig_en;
-wire	[3:0]		trig_stages;
-wire				trig_value_wr;
-wire				trig_mask_wr;
-wire				trig_edge_wr;
-wire				trig_count_wr;
-wire				trig_logic_wr;
-wire	[1:0]		trig_mu;
+wire		full_speed;
+wire		trig_en;
+wire	[3:0]	trig_stages;
+wire		trig_value_wr;
+wire		trig_mask_wr;
+wire		trig_edge_wr;
+wire		trig_count_wr;
+wire		trig_logic_wr;
+wire	[1:0]	trig_mu;
 wire	[15:0]	trig_mask;
 wire	[15:0]	trig_value;
 wire	[15:0]	trig_edge;
 wire	[15:0]	trig_count;
-wire	[1:0]		trig_logic;
+wire	[1:0]	trig_logic;
 
 wire	[31:0]	sample_depth;
 wire	[31:0]	sample_last_cnt;
@@ -134,18 +135,18 @@ wire		capture_done;
 wire		capture_valid;
 wire	[15:0]	capture_data;
 
-wire				lpb_read_done;
-wire				lpb_read;
-wire				lpb_error;
+wire		lpb_read_done;
+wire		lpb_read;
+wire		lpb_error;
 wire	[31:0]	lpb_sample_last_cnt;
-wire				lpb_capture_done;
-wire				lpb_capture_valid;
+wire		lpb_capture_done;
+wire		lpb_capture_valid;
 wire	[15:0]	lpb_capture_data;
 wire	[31:0]	dw_sample_last_cnt;
-wire				dw_capture_done;
-wire				dw_capture_valid;
+wire		dw_capture_done;
+wire		dw_capture_valid;
 wire	[15:0]	dw_capture_data;
-wire				dr_usb_rdy;
+wire		dr_usb_rdy;
 wire	[15:0]	dr_usb_dout;
 
 wire		wr_done;
@@ -184,16 +185,15 @@ wire	uart_rx;
 
 wire	[23:0]	dso_sampleDivider;
 wire	[23:0]	dso_triggerPos;
-wire	[7:0]		dso_triggerSlope;
-wire	[7:0]		dso_triggerSource;
+wire	[7:0]	dso_triggerSlope;
+wire	[7:0]	dso_triggerSource;
 wire	[15:0]	dso_triggerValue;
-wire				dso_setZero;
-wire				dso_setZero_done;
+wire		dso_setZero;
+wire		dso_setZero_done;
 
 //RLE
-wire				rle_en;
+wire		rle_en;
 wire  [24:0] 	rle_sample_cnt; 
-
 
 // --
 // ports
@@ -382,7 +382,7 @@ reset reset(
 // --
 // configuration through usb controller
 // --
-cfg cfg(
+cfg #(.MODE(MODE))cfg(
 	// -- clock & reset
 	.usb_clk(usb_clk),
 	.usb_rst(cfg_rst),
@@ -451,24 +451,24 @@ reg	sd_init_done_sync1;
 
 always @(posedge core_clk or posedge core_rst)
 begin
-	if (core_rst) begin
-	    sys_en_sync0 <= `D 1'b0;
-    sys_en_sync1 <= `D 1'b0;
-    sd_init_done_sync0 <= `D 1'b0;
-    sd_init_done_sync1 <= `D 1'b0;
-    sample_rdy <= `D 1'b0;
-    sample_rdy_1T <= `D 1'b0;
-    sample_en <= `D 1'b0;
-	end else begin
-    sys_en_sync0 <= `D sys_en;
-    sys_en_sync1 <= `D sys_en_sync0;
-    sd_init_done_sync0 <= `D sd_init_done;
-    sd_init_done_sync1 <= `D sd_init_done_sync0;
-    sample_rdy <= `D sys_en_sync1 & sd_init_done_sync1;
-    sample_rdy_1T <= `D sample_rdy;
-    sample_en <= `D (sample_rdy & ~sample_rdy_1T) ? 1'b1 :
+    if (core_rst) begin
+	sys_en_sync0 <= `D 1'b0;
+    	sys_en_sync1 <= `D 1'b0;
+    	sd_init_done_sync0 <= `D 1'b0;
+    	sd_init_done_sync1 <= `D 1'b0;
+    	sample_rdy <= `D 1'b0;
+    	sample_rdy_1T <= `D 1'b0;
+    	sample_en <= `D 1'b0;
+    end else begin
+    	sys_en_sync0 <= `D sys_en;
+    	sys_en_sync1 <= `D sys_en_sync0;
+    	sd_init_done_sync0 <= `D sd_init_done;
+    	sd_init_done_sync1 <= `D sd_init_done_sync0;
+    	sample_rdy <= `D sys_en_sync1 & sd_init_done_sync1;
+    	sample_rdy_1T <= `D sample_rdy;
+    	sample_en <= `D (sample_rdy & ~sample_rdy_1T) ? 1'b1 :
 	    	    (capture_done | (~sample_rdy & sample_rdy_1T)) ? 1'b0 : sample_en;
-	end
+    end
 end
 assign ext_out = wireless_mode ? sample_en : uart_tx;
 sample sample(
@@ -575,7 +575,8 @@ capture capture(
 	.capture_data(capture_data),
 	
 	//from RLE
-	.rle_sample_cnt(rle_sample_cnt)
+	.rle_sample_cnt(rle_sample_cnt),
+	.rle_en(rle_en)
 );
 
 // --
@@ -630,6 +631,7 @@ assign dw_sample_last_cnt = sd_lpb_mode ? lpb_sample_last_cnt : sample_last_cnt;
 assign dw_capture_done = sd_lpb_mode ? lpb_capture_done : capture_done;
 assign dw_capture_valid = sd_lpb_mode ? lpb_capture_valid : capture_valid;
 assign dw_capture_data = sd_lpb_mode ? lpb_capture_data : capture_data;
+
 dwrite dwrite(
 	// -- clock & reset
 	.core_clk(core_clk),

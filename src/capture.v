@@ -31,7 +31,7 @@ module capture(
 	input		wireless_mode,
 	input		dso_setZero,
 	input		sample_en,
-	input				full_speed,
+	input		full_speed,
 	input	[31:0]	sample_depth,
 	input	[31:0]	sample_last_cnt,
 	input	[31:0]	sample_real_start,
@@ -53,18 +53,18 @@ module capture(
 	output	reg	[31:0]	trig_real_pos,
 	output	reg		capture_done,
 	output	reg	[31:0]	sd_saddr,
-	output					capture_valid,
+	output			capture_valid,
 	output		[15:0]	capture_data,
 	
 	//from RLE
-	input				rle_en,
-	input  [24:0]  rle_sample_cnt
+	input		rle_en,
+	input  [24:0]  	rle_sample_cnt
 );
 // --
 // internal singals definition
 // --
-reg				capture_cnt_valid = 1'b0;
-wire				caputre_cnt_valid_nxt;
+reg		capture_cnt_valid = 1'b0;
+wire		caputre_cnt_valid_nxt;
 reg	[31:0]	capture_cnt;
 wire	[31:0]	capture_cnt_nxt;
 
@@ -80,8 +80,8 @@ reg	loop0;
 wire	loop0_nxt;
 
 wire	[15:0]	capture_data_pre;
-reg				capture_valid_pre;
-wire				capture_valid_pre_nxt;
+reg		capture_valid_pre;
+wire		capture_valid_pre_nxt;
 
 // --
 // capture_cnt record the count(mod sample_depth) before trig_hit
@@ -160,12 +160,12 @@ begin
 	else
 		trig_real_start <= `D trig_real_start_nxt;
 end									  
-assign sd_saddr_nxt = (capture_done & (set_before_real | ~trig_en)) ? 32'b0 : 
-							 capture_done ? {trig_real_start[29:0], 2'b0} : sd_saddr;
+assign sd_saddr_nxt = (capture_done & (set_before_real | ~trig_en | rle_en)) ? 32'b0 :
+						       capture_done ? {trig_real_start[29:0], 2'b0} : sd_saddr;
 always @(posedge core_clk or posedge core_rst)
 begin
     if (core_rst)
-	     sd_saddr <= `D 32'b0;
+	sd_saddr <= `D 32'b0;
     else
         sd_saddr <= `D sd_saddr_nxt;
 end																										 
@@ -205,10 +205,10 @@ begin
 		loop0 <= `D loop0_nxt;
 end
 
-assign capture_done_nxt = capture_done ? 1'b0 :
-			 (~cons_mode & trig_hit & trig_en & capture_cnt_valid & (capture_cnt == after_trig_depth)) ? 1'b1 :
+assign capture_done_nxt = capture_done? 1'b0 :
+			             (~rle_en & ~cons_mode & trig_hit & trig_en & capture_cnt_valid & (capture_cnt == after_trig_depth)) ? 1'b1 :
 			 ((~rle_en)?((~cons_mode & trig_hit & ~trig_en & capture_valid_pre & (capture_cnt == sample_last_cnt)) ? 1'b1 : capture_done):
-			  ((~cons_mode & trig_hit & ~trig_en & capture_valid_pre & (rle_sample_cnt[24:0] == 25'Hffff)) ? 1'b1 : capture_done)); //This is for instant trigger mode
+			            ((~cons_mode & trig_hit & trig_en & capture_valid_pre & (rle_sample_cnt[24:0] == 25'Hffff)) ? 1'b1 : capture_done));
 always @(posedge core_clk or posedge core_rst)
 begin
 	if (core_rst)

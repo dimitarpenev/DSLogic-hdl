@@ -5,7 +5,7 @@ run
 -ofn DSLogic
 -ofmt NGC
 -p xc6slx9-2-tqg144
--top DSLogic_top
+-top DSLogic
 -opt_mode Speed
 -opt_level 1
 -power NO

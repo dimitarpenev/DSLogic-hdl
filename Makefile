@@ -10,14 +10,7 @@ default: $(TARGET)33.bin
  
 MY_VERILOG_FILES := $(shell find ./src/ -name '*.v')
 
-#DSLogic.edif: $(VERILOG_FILES) $(VERILOG_FILES_ISE)
-#	iverilog -tfpga -o DSLogic.edif -I ./src/i2c/ -y ./ISE/unisims/ \
-#	./ISE/XilinxCoreLib/FIFO_GENERATOR_V8_2.v ./ISE/Verilog/src/glbl.v $(VERILOG_FILES)
-#
-#I am not sure if fpga target is working fine for Spartan6 with the current Icarus verilog
-#Still I am about to investigate the benefits of iverilog over xst
-
-#Compilation =========================
+#Synthesis ============================================================================================================================================
 #build the ngc (netlist) file
 $(TARGET).ngc:	$(MY_VERILOG_FILES)
 	echo $(MY_VERILOG_FILES) | sed "s/ /\nVerilog work /g" | sed "1s/^/Verilog work /" > $(TARGET).prj
@@ -49,5 +42,19 @@ $(TARGET)33.bin: $(TARGET).bit
 install: $(TARGET)33.bin
 	cp $(TARGET)33.bin ../DSLogic/DSLogic-gui/res/
 
+# Clean ===============================================================================================================================================
 clean:
-	find -maxdepth 1 ! -name 'NEWS' ! -name 'COPYING' ! -name 'README' ! -name 'Makefile' -type f -exec rm -f {} +
+	find -maxdepth 1 ! -name 'NEWS' ! -name 'COPYING' ! -name 'README' ! -name 'Makefile' ! -name $(TARGET)33.bin -type f -exec rm -f {} +
+	rm -rf _ngo/ _xmsgs/ xlnx_auto_0_xdb/ xst/
+
+#Simulation ===========================================================================================================================================
+#Add -Wall if you need all warnings
+$(TARGET): $(MY_VERILOG_FILES) ./tb/DSLogic_tb.v
+	iverilog -o DSLogic -I ./src/i2c/ -I ./tb/ -y /opt/Xilinx/14.7/ISE_DS/ISE/verilog/src/unisims/ ./tb/DSLogic_tb.v \
+	/opt/Xilinx/14.7/ISE_DS/ISE/verilog/src/XilinxCoreLib/FIFO_GENERATOR_V8_2.v /opt/Xilinx/14.7/ISE_DS/ISE/verilog/src/glbl.v $(MY_VERILOG_FILES)
+
+$(TARGET).lxt2: $(TARGET)
+	vvp $(TARGET) -lxt2
+
+sim:	$(TARGET).lxt2
+	gtkwave $(TARGET).lxt2

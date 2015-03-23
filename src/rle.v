@@ -32,6 +32,7 @@ module rle(
 	// -- clock & reset
 	input   core_clk,
 	input   core_rst,
+	input	rle_en,
 	
 	//trigger hit starts RLE
 	input		trig_hit,
@@ -110,13 +111,13 @@ end
 //This is used in capture module to stop the acquisition
 always @(posedge core_clk or posedge core_rst)
 begin
-	if (core_rst)
+	if (core_rst | ~rle_en)
 	begin
 		rle_sample_cnt_reg <= 0;
 		rle_start <= 0;
 	end
 	else if (~rle_start & trig_hit)
-			rle_start <= 1'b1;	
+		rle_start <= 1'b1;	
 	else if (rle_start & rle_valid_reg )
 	begin
 		rle_sample_cnt_reg <= rle_sample_cnt_reg +1;

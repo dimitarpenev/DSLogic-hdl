@@ -23,46 +23,46 @@
 
 module cons_buf (
 	// -- Clock & Reset
-	input					core_clk,
-	input					core_rst,
-	input   				sdram_clk,
-	input   				sd_rst,
+	input		core_clk,
+	input		core_rst,
+	input   	sdram_clk,
+	input   	sd_rst,
 
 	// --
-	input					cons_mode,
+	input		cons_mode,
 
 	// -- data in
-	input					sample_en,
-	input					capture_done,
-	input					capture_valid,
-	input	[15:0]		capture_data,
-	input					wr_done,
+	input		sample_en,
+	input		capture_done,
+	input		capture_valid,
+	input	[15:0]	capture_data,
+	input		wr_done,
 
 	// -- dread
-	input					rd_req,
-	output				rd_valid,
-	input		[31:0]	rd_addr,
-	output				rd_rdy,
+	input		rd_req,
+	output		rd_valid,
+	input	[31:0]	rd_addr,
+	output		rd_rdy,
 	output	[15:0]	rd_data,
 
 	// -- DSO config
-	input		[23:0]	dso_sampleDivider,
-	input		[23:0]	dso_triggerPos,
-	input		[7:0]		dso_triggerSlope,
-	input		[7:0]		dso_triggerSource,
-	input		[16:0]	dso_triggerValue,
+	input	[23:0]	dso_sampleDivider,
+	input	[23:0]	dso_triggerPos,
+	input	[7:0]	dso_triggerSlope,
+	input	[7:0]	dso_triggerSource,
+	input	[15:0]	dso_triggerValue,
 	
 	// -- sdram
 	// -- dread
-	output				read_start,
-	output				sd_rd_req,
-	input					sd_rd_valid,
+	output		read_start,
+	output		sd_rd_req,
+	input		sd_rd_valid,
 	output	[31:0]	sd_rd_addr,
-	input					sd_rd_rdy,
-	input		[15:0]	sd_rd_data
+	input		sd_rd_rdy,
+	input	[15:0]	sd_rd_data
 );
 
-`define DP_MAXBIT			12
+`define DP_MAXBIT			 12
 `define FPS_MAX			24'd5000000
 
 // --

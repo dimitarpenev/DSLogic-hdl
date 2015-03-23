@@ -51,7 +51,7 @@ module dwrite(
 	// -- RLE
 	input		rle_en,
 	input		trig_hit,
-	output  [24:0]  rle_sample_cnt	
+	output  [24:0]  rle_sample_cnt
 );
 
 // --
@@ -104,35 +104,15 @@ end
 // --
 // RLE runs at core_clk
 // --
-
-/*
-// For test
-always @(posedge core_clk or posedge core_rst)
-begin
-	if (core_rst)
-	begin
-		capture_data_<=0;
-		capture_data_cnt_<=0;
-	end
-	else
-	begin
-		capture_data_cnt_ <=capture_data_cnt_+1;
-		if (capture_data_cnt_ == 10)
-		begin
-			capture_data_cnt_ <= 0;
-			capture_data_<=capture_data_ + 1;
-		end
-	end
-end
-*/
-
 rle rle(
 	// -- clock & reset
 	.core_clk(core_clk),
 	.core_rst(core_rst),
+	.rle_en(rle_en),
+
 	// -- data
-	.capture_data(capture_data), //Input data
-	.rle_data(rle_data),			  //Output data
+	.capture_data(capture_data), 	//Input data
+	.rle_data(rle_data),		//Output data
 	.rle_valid(rle_valid),
 	.rle_sample_cnt(rle_sample_cnt),
 	.trig_hit(trig_hit)
@@ -244,14 +224,19 @@ end
 assign wr_req = ~wfifo_empty;
 
 // -- wr_addr
-assign wr_addr_nxt = (/*(rle_en & trig_hit)|*/(wr_valid & ({2'b0, wr_addr[31:2]} == sample_last_cnt))) ? 32'b0 :
-		     wr_valid ? wr_addr + 3'b100 : wr_addr;
+reg trig_hit_old;
+//assign wr_addr_nxt = ((rle_en & trig_hit & ~trig_hit_old) | (wr_valid & ({2'b0, wr_addr[31:2]} == sample_last_cnt))) ? 32'b0 :
+assign wr_addr_nxt = (wr_valid & ({2'b0, wr_addr[31:2]} == sample_last_cnt)) ? 32'b0 :
+		      wr_valid ? wr_addr + 3'b100 : wr_addr;
 always @(posedge sdram_clk or posedge sdram_rst)
 begin
-	if (sdram_rst)
+	if (sdram_rst) begin
 		wr_addr <= `D 32'b0;
-	else
+		trig_hit_old <= 1'b0;
+	end else begin
 		wr_addr <= `D wr_addr_nxt;
+		trig_hit_old <= trig_hit;
+	end
 end
 
 

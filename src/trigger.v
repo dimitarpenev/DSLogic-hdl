@@ -23,32 +23,32 @@
 
 module trigger(
 	// -- clock & reset
-	input				core_clk,
-	input				core_rst,
+	input		core_clk,
+	input		core_rst,
 
 	// -- trigger configuration
-	input				full_speed,
-	input				trig_en,
-	input	[3:0]		trig_stages,
-	input	[1:0]		trig_mu,	
-	input				trig_mask_wr,
-	input				trig_value_wr,
-	input				trig_edge_wr,
-	input				trig_count_wr,
-	input				trig_logic_wr,
+	input		full_speed,
+	input		trig_en,
+	input	[3:0]	trig_stages,
+	input	[1:0]	trig_mu,	
+	input		trig_mask_wr,
+	input		trig_value_wr,
+	input		trig_edge_wr,
+	input		trig_count_wr,
+	input		trig_logic_wr,
 	input	[15:0]	trig_mask,
 	input	[15:0]	trig_value,
 	input	[15:0]	trig_edge,
 	input	[15:0]	trig_count,
-	input	[1:0]		trig_logic,
-	input				sample_en,
+	input	[1:0]	trig_logic,
+	input		sample_en,
 	
 	// -- sample data in
-	input				sample_valid,
+	input		sample_valid,
 	input	[15:0]	sample_data,
 
 	// -- control
-	input				capture_done,
+	input		capture_done,
 
 	// -- trigger output
 	output	[3:0]	trig_dly,
@@ -68,12 +68,12 @@ wire		trig_hit_nxt;
 // --
 // trigger hit
 // --
-wire				trig_shift;
-reg				sample_en_1T;
-reg				sample_valid_1T = 1'b0;
-reg				sample_valid_2T = 1'b0;
-reg				edge_window = 1'b0;
-wire				edge_window_nxt;
+wire		trig_shift;
+reg		sample_en_1T;
+reg		sample_valid_1T = 1'b0;
+reg		sample_valid_2T = 1'b0;
+reg		edge_window = 1'b0;
+wire		edge_window_nxt;
 reg	[15:0]	cur_trig_value0 = 16'b0;
 reg	[15:0]	cur_trig_value1 = 16'b0;
 reg	[15:0]	cur_trig_value2 = 16'b0;
