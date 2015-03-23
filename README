@@ -1,9 +1,16 @@
 -------------------------------------------------------------------------------
 README
 -------------------------------------------------------------------------------
-
 DSLogic-hdl is an Open-source hdl design for spartan-6 FPGA of DSLogic
 DSLogic project: www.dreamsourcelab.com
+
+
+Dimitar Penev, March 2015 dpn@switchvoice.com
+---------------------------------------------
+-Synthesis from a command line using gmake
+-Added Run Length Encoding (RLE)
+-Test bench using Icarus Verilog. CPU interface is not fully tested
+
 
 Status
 ------
